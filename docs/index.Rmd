@@ -94,9 +94,129 @@ gapminder %>%
   mutate(max_gdpPercap = max(gdpPercap)) %>%
   filter(max_gdpPercap == gdpPercap) %>%
   arrange(max_gdpPercap)
+```
+##joining datasets
 
+```{r}
+## 
+co2 <- read_csv("https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/co2.csv")
+co2 %>% head()
+co2 %>% str()
+gap_2007 <- gapminder %>% 
+  filter(year == 2007)
+gap_2007 %>% head()
+gap_2007 %>%  str()
+
+## left_join gap_2007 to co2
+lj <- left_join(gap_2007, co2, by = "country")
+lj %>% dim() #142 rows
+# lj %>% View()
+
+## right_join gap_2007 to co2
+rj <- right_join(gap_2007, co2)
+rj %>% dim()
+# rj %>% View()
 
 ```
+
+```{r}
+library(tidyverse)
+```
+## Example datasets
+```{r}
+AirPassengers
+
+```
+```{r read_in_data}
+# wide format
+gap_wide <- readr::read_csv('https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/gapminder_wide.csv')
+
+## yesterday's format (intermediate)
+gapminder <- readr::read_csv('https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/gapminder.csv')
+head(gap_wide)
+head(gapminder)
+## 'gather()'
+```
+```{r}
+gap_long <- gap_wide %>% 
+  gather(key   = obstype_year,
+         value = obs_values,
+         dplyr::starts_with('pop'),
+         dplyr::starts_with('lifeExp'),
+         dplyr::starts_with('gdpPercap'))  #here i'm listing all the columns to use in gather
+
+str(gap_long)
+head(gap_long)
+tail(gap_long)
+
+```
+```{r}
+gap_long <- gap_wide %>% 
+  gather(key   = obstype_year,
+         value = obs_values,
+         -continent, -country)
+
+str(gap_long)
+head(gap_long)
+tail(gap_long)
+```
+```{r}
+gap_long <- gap_wide %>% 
+  gather(key   = obstype_year,
+         value = obs_values,
+         continent, -country) %>%
+  separate(obstype_year,
+           into = c('obs_type','year'),
+           sep = "_",
+           convert = T) #this ensures that the year column is an integer rather than a character
+head(gap_long)
+```
+```{r}
+life_df <- gap_long %>%
+  filter(obs_type == "lifeExp",
+         continent == "Americas")
+head(life_df)
+ggplot(life_df, aes(x = year, y = obs_values, color = country)) +
+  geom_line()
+
+
+gap_long %>% 
+  group_by(continent obs_type) %>% 
+     summarize(means = mean(obs_values))
+head(gap_long)
+
+```
+
+```{r}
+head(gap_long)
+gap_normal <- gap_long %>% 
+  spread(key = obs_type,
+         value = obs_values)
+head(gap_normal)
+```
+```{r}
+head(gap_long) # remember the columns
+
+gap_wide_new <- gap_long %>% 
+  # first unite obs_type and year into a new column called var_names. Separate by _
+  unite(col = var_names, obs_type, year, sep = "_") %>% 
+  # then spread var_names out by key-value pair.
+  spread(key = var_names, value = obs_values)
+str(gap_wide_new)
+```
+
+
+```{r}
+
+gap_long %>% 
+  group_by(continent obs_type) %>% 
+     summarize(means = mean(obs_values))
+head(gap_long)
+
+```
+
+
+
 ## `geom_point`
 
 ```{r scatterplot}
