@@ -8,13 +8,95 @@ output:
     toc: true
     toc_float: true
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library(tidyverse)
-```
 
+```
+## Data Wrangling with 'dplyr'
+```{r}
+library(tidyverse)
+
+gapminder <- readr::read_csv("https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/gapminder.csv")
+
+gapminder
+## useful functions to get to know your data:
+head(gapminder) #show the first 6 rows of data
+tail(gapminder) #sow the last 6 rows of data
+
+head(gapminder,10)
+tail(gapminder,9)
+##check out the structure of your data
+str(gapminder)
+##column headers
+names(gapminder)
+
+dim(gapminder)
+ncol(gapminder)
+nrow(gapminder)
+c(nrow(gapminder), ncol(gapminder))
+
+summary(gapminder)
+## for everything above, we are operating on the whole gapminder dataset
+head(gapminder$lifeExp)
+
+##Actually working with dplyr
+
+filter(gapminder, lifeExp < 29)
+filter(gapminder, country == "Mexico")
+gapminder %>% head()
+sweden <- filter(gapminder, country == "Sweden")
+mean(sweden$lifeExp)
+gapminder %>% 
+   filter(country == "Sweden") %>% 
+   summarize(mean_lifeExp = mean(lifeExp))
+gapminder %>%
+   filter(country == "Cambodia") %>%
+   select(country, year, pop, gdpPercap)
+gapminder %>%
+  filter(country == "Mexico", year == 2002)
+## 'mutate()' to add columns
+gapminder %>%
+  mutate(gdp = pop * gdpPercap)
+# let's add an index column
+gapminder %>%
+  mutate(index = 1:nrow(gapminder))%>%
+  tail()
+
+#not the right way  
+gapminder %>%
+  filter(country == c("Egypt", "Vietnam"))
+
+## '%in%' operator lets you filter multiple things within a 'c()' thing
+gapminder %>%
+  filter(country %in% c("Egypt", "Vietnam")) %>%
+  mutate(max_gdpPercap = max(gdpPercap))
+
+## group_by() so that we can get 2 maxes
+gapminder %>%
+  filter(country %in% c("Egypt", "Vietnam")) %>%
+  group_by(country) %>%
+  summarise(max_gdpPercap = max(gdpPercap))
+
+gapminder %>%
+  group_by(country) %>%
+  summarise(max_gdpPercap = max(gdpPercap))
+
+## let's keep the year associated with the max_gdpPercap
+gapminder %>%
+  group_by(country) %>%
+  mutate(max_gdpPercap = max(gdpPercap)) %>%
+  filter(max_gdpPercap == gdpPercap) 
+
+## arrange by g
+gapminder %>%
+  group_by(country) %>%
+  mutate(max_gdpPercap = max(gdpPercap)) %>%
+  filter(max_gdpPercap == gdpPercap) %>%
+  arrange(max_gdpPercap)
+
+
+```
 ## `geom_point`
 
 ```{r scatterplot}
